@@ -27,7 +27,6 @@ HEADERS += \
     multifeaturelistmodel.h \
     featurelistmodelselection.h \
     featuremodel.h \
-    qfieldutils.h \
     qgismobileapp.h \
     qgsgpkgflusher.h \
     qgssggeometry.h \
@@ -68,8 +67,10 @@ HEADERS += \
     referencingfeaturelistmodel.h \
     featurechecklistmodel.h \
     qfieldappauthrequesthandler.h \
-    fileutils.h \
-    viewstatus.h
+    viewstatus.h \
+    utils/featureutils.h \
+    utils/geometryutils.h \
+    utils/fileutils.h
 
 SOURCES += \
     appinterface.cpp \
@@ -78,7 +79,6 @@ SOURCES += \
     multifeaturelistmodel.cpp \
     featurelistmodelselection.cpp \
     featuremodel.cpp \
-    qfieldutils.cpp \
     qgismobileapp.cpp \
     qgsgpkgflusher.cpp \
     qgssggeometry.cpp \
@@ -119,11 +119,14 @@ SOURCES += \
     referencingfeaturelistmodel.cpp \
     featurechecklistmodel.cpp \
     qfieldappauthrequesthandler.cpp \
-    fileutils.cpp \
-    viewstatus.cpp
+    viewstatus.cpp \
+    utils/featureutils.cpp \
+    utils/geometryutils.cpp \
+    utils/fileutils.cpp
 
 INCLUDEPATH += ../../3rdparty/tessellate \
                ../qgsquick \
+               utils
 
 DEPENDPATH += ../qgsquick
 

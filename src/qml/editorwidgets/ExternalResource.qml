@@ -21,14 +21,13 @@ Item {
   property ViewStatus __viewStatus
 
   //on all mimetypes image/... and on empty values it should appear as an image widget
-  property bool isImage: FileUtils.mimeTypeName( qgisProject.homePath + '/' + value ).startsWith("image/") || FileUtils.fileName( qgisProject.homePath + '/' + value ) === ''
+  property bool isImage: value === undefined || FileUtils.mimeTypeName( qgisProject.homePath + '/' + value ).startsWith("image/") || FileUtils.fileName( qgisProject.homePath + '/' + value ) === ''
 
   //to not break any binding of image.source
   property var currentValue: value
   onCurrentValueChanged: {
-      console.log
-      if (isImage ) {
-          if ( FileUtils.fileName( qgisProject.homePath + '/' + value ) === '' ) {
+      if ( isImage ) {
+          if ( value === undefined || FileUtils.fileName( qgisProject.homePath + '/' + value ) === '' ) {
               image.source=Theme.getThemeIcon("ic_photo_notavailable_black_24dp")
               geoTagBadge.visible = false
           } else if ( image.status === Image.Error || !FileUtils.fileExists( qgisProject.homePath + '/' + value ) ) {
@@ -48,7 +47,7 @@ Item {
     id: expressionUtils
     feature: currentFeature
     layer: currentLayer
-    expressionText: currentLayer.customProperty('QFieldSync/photo_naming')!==undefined ? JSON.parse(currentLayer.customProperty('QFieldSync/photo_naming'))[field.name] : ''
+    expressionText: currentLayer ? currentLayer.customProperty('QFieldSync/photo_naming')!==undefined ? JSON.parse(currentLayer.customProperty('QFieldSync/photo_naming'))[field.name] : '' : ''
   }
 
   Label {
@@ -57,6 +56,7 @@ Item {
     topPadding: 10 * dp
     bottomPadding: 10 * dp
     visible: !isImage
+    enabled: !isImage
     anchors.left: parent.left
     anchors.right: parent.right
     font: Theme.defaultFont
@@ -89,6 +89,7 @@ Item {
   Image {
     id: image
     visible: isImage
+    enabled: isImage
     width: 200 * dp
     autoTransform: true
     fillMode: Image.PreserveAspectFit
@@ -140,9 +141,9 @@ Item {
 
     onClicked: {
         if ( settings.valueBool("nativeCamera", true) ) {
-            var filepath = expressionUtils.evaluate()
-            if( !filepath )
-                filepath = 'DCIM/JPEG_'+(new Date()).toISOString().replace(/[^0-9]/g, "")+'.jpg'
+            var evaluated_filepath = expressionUtils.evaluate()
+            var filepath = !evaluated_filepath ? 'DCIM/JPEG_'+(new Date()).toISOString().replace(/[^0-9]/g, "")+'.jpg' :
+                                                 FileUtils.filePath(evaluated_filepath)+'/'+FileUtils.fileCompleteBaseName(evaluated_filepath) +'.jpg'
             __pictureSource = platformUtilities.getCameraPicture(qgisProject.homePath+'/',filepath)
         } else {
             platformUtilities.createDir( qgisProject.homePath, 'DCIM' )
@@ -165,9 +166,9 @@ Item {
     visible: !readOnly && isImage
 
     onClicked: {
-        var filepath = expressionUtils.evaluate()
-        if( !filepath )
-            filepath = 'DCIM/JPEG_'+(new Date()).toISOString().replace(/[^0-9]/g, "")+'.jpg'
+        var evaluated_filepath = expressionUtils.evaluate()
+        var filepath = !evaluated_filepath ? 'DCIM/JPEG_'+(new Date()).toISOString().replace(/[^0-9]/g, "")+'.jpg' :
+                                             FileUtils.filePath(evaluated_filepath)+'/'+FileUtils.fileCompleteBaseName(evaluated_filepath) +'.jpg'
         __pictureSource = platformUtilities.getGalleryPicture(qgisProject.homePath+'/', filepath)
     }
 
@@ -208,10 +209,9 @@ Item {
         visible: true
 
         onFinished: {
-            Project.re
-            var filepath = expressionUtils.evaluate()
-            if( !filepath )
-                filepath = 'DCIM/JPEG_'+(new Date()).toISOString().replace(/[^0-9]/g, "")+'.jpg'
+            var evaluated_filepath = expressionUtils.evaluate()
+            var filepath = !evaluated_filepath ? 'DCIM/JPEG_'+(new Date()).toISOString().replace(/[^0-9]/g, "")+'.jpg' :
+                                                 FileUtils.filePath(evaluated_filepath)+'/'+FileUtils.fileCompleteBaseName(evaluated_filepath) +'.jpg'
             platformUtilities.renameFile( path, qgisProject.homePath +'/' + filepath)
             valueChanged(filepath, false)
             campopup.close()
